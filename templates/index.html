@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="shortcut icon" href="static/favicon.ico">
+    <link rel="stylesheet" href="static/style.css">
+    <script src="static/jquery-3.2.1.min.js"></script>
+    <script src="static/throttle.js"></script>
+
+    <title>Remote Camera</title>
+
+  </head>
+  <body>
+
+    <div id="main_zone">
+        <div class="infos">
+            Live Stream
+        </div>
+        <div id="item"></div>
+        <script language="JavaScript">
+            document.write('<img id="video_source" src="' + window.location.protocol + '//' + window.location.hostname + ':5001' + '/stream.mjpg' + '"/>' );
+        </script>
+    </div>
+
+    <script>
+        var server_address = window.location.protocol + "//" + window.location.host + "/cmd";
+        
+        var dragItem = document.querySelector("#item");
+        var pos_info = dragItem.getBoundingClientRect();
+        
+        var container = document.querySelector("#main_zone");
+        var cont_info = container.getBoundingClientRect();
+        var position = {
+            x: cont_info.width / 2 - pos_info.width / 2,
+            y: cont_info.height / 2 - pos_info.height / 2,
+        };
+        
+        setTranslate(position.x, position.y, dragItem);
+        var active = false;
+        var currentX;
+        var currentY;
+        var initialX;
+        var initialY;
+        var xOffset = position.x;
+        var yOffset = position.y;
+        container.addEventListener("touchstart", dragStart, false);
+        container.addEventListener("touchend", dragEnd, false);
+        container.addEventListener("touchmove", drag, false);
+        container.addEventListener("mousedown", dragStart, false);
+        container.addEventListener("mouseup", dragEnd, false);
+        container.addEventListener("mousemove", drag, false);
+        function dragStart(e) {
+          if (e.type === "touchstart") {
+            initialX = e.touches[0].clientX - xOffset;
+            initialY = e.touches[0].clientY - yOffset;
+          } else {
+            initialX = e.clientX - xOffset;
+            initialY = e.clientY - yOffset;
+          }
+          if (e.target === dragItem) {
+            active = true;
+          }
+        }
+        function dragEnd(e) {
+          initialX = currentX;
+          initialY = currentY;
+          active = false;
+        }
+        function drag(e) {
+          if (active) {
+          
+            e.preventDefault();
+          
+            if (e.type === "touchmove") {
+              currentX = e.touches[0].clientX - initialX;
+              currentY = e.touches[0].clientY - initialY;
+            } else {
+              currentX = e.clientX - initialX;
+              currentY = e.clientY - initialY;
+            }
+            
+            if (currentX >= 0 && 
+                    currentX <= cont_info.width - pos_info.width) {
+                xOffset = currentX;
+            }
+            
+            if (currentY >= 0 && 
+                    currentY <= cont_info.height - pos_info.height) {
+                yOffset = currentY;
+            }
+            
+            setTranslate(xOffset, yOffset, dragItem);
+            position.x = xOffset / (cont_info.width - pos_info.width);
+            position.y = yOffset / (cont_info.height - pos_info.height);
+            
+            query_string = '?' + $.param(position);
+            // use the following function instead the usual $.post
+            // so that we can throttle the rate of sending data
+            // good practice for not "choking" the network
+            send_throttled_data(server_address, query_string, position);
+          }
+        }
+        function setTranslate(xPos, yPos, el) {
+          el.style.transform = "translate3d(" + xPos + "px, " + yPos + "px, 0)";
+        }
+        
+        // function for throttling the rate of sending data
+        // sends data every 250 ms
+        var send_throttled_data = throttle(function(server_address, query_string, sent_data){
+            //console.log('move', sent_data);
+            $.post(server_address + query_string);
+        }, 250);
+    </script>
+  </body>
+</html>

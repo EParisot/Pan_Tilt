@@ -1,0 +1,43 @@
+body {
+  overflow: hidden;
+}
+
+#main_zone {
+  width: 100%;
+  height: 100vh;
+  left: 0;
+  top: 0;
+}
+
+#item {
+  position: absolute;
+  border: 5px solid lime;
+  height: 300px;
+  width: 300px;
+  border-radius: 100%;
+}
+
+#video_source{
+  display:block;
+  width:100%; 
+  height:100%;
+  object-fit: cover;
+  background-color: white;
+  background-image: url("/static/plane_loading.gif"), url('/static/waiting.svg');
+  background-size: auto 100%;
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+.infos {
+  position: absolute;
+  height: auto;
+  width: 10%;
+  min-width: 110px;
+  left: 0.5%;
+  top: 0.5%;
+  padding: 1%;
+  font-family: "Lucida Sans Typewriter";
+  color: rgb(68, 68, 68);
+  background: rgba(223, 226, 219, 0.7);
+}
