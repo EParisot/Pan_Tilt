@@ -6,9 +6,6 @@ import sys
 import logging
 import time
 import os
-from PIL import Image
-import numpy as np
-import cv2
 
 # check if it's ran with Python3
 assert sys.version_info[0:1] == (3,)
@@ -142,19 +139,6 @@ class StreamingHandler(server.BaseHTTPRequestHandler):
     '''
     Implementing GET request for the video stream.
     '''
-        
-    def draw_circle(self, np_img, x_pred, y_pred):
-        w = int(self.model.layers[-2].output_shape[-1])
-        h = int(self.model.layers[-1].output_shape[-1])
-        x = int(np_img.shape[1] / w) * x_pred + int((np_img.shape[1] / w) / 2)
-        y = int(np_img.shape[0] / h) * y_pred + int((np_img.shape[0] / h) / 2)
-        cv2.circle(np_img,(x, y), 25, (0, 255, 0), 2)
-        img = Image.fromarray(np_img)
-        with io.BytesIO() as output:
-            img.save(output, format="JPEG")
-            img = output.getvalue()
-        return img
-    
     def do_GET(self):
         if self.path == '/stream.mjpg':
             self.send_response(200)
